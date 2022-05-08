@@ -1,52 +1,34 @@
 package tests;
 
-import org.openqa.selenium.By;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
-import org.openqa.selenium.chrome.ChromeDriver;
-import org.testng.annotations.AfterMethod;
+import manager.ApplicationManager;
+import org.openqa.selenium.remote.BrowserType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.testng.annotations.AfterSuite;
 import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.BeforeSuite;
 
-import java.util.concurrent.TimeUnit;
+import java.lang.reflect.Method;
 
 public class TestBase {
-    WebDriver wd;
 
+    protected static ApplicationManager app = new ApplicationManager(System.getProperty("browser", BrowserType.CHROME));
+    Logger logger = LoggerFactory.getLogger(TestBase.class);
 
-    @BeforeMethod
-    public void init(){
-        //browser+https
-        wd=new ChromeDriver();
-        wd.manage().window().maximize();
-        wd.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
-        wd.navigate().to("https://contacts-app.tobbymarshall815.vercel.app/home");
+    @BeforeMethod (alwaysRun = true)
+    public void startLogger(Method m) {
+        logger.info("Start test --->" + m.getName());
     }
 
-    @AfterMethod
-    public void tearDown()
-    {
-        wd.quit();
+    @BeforeSuite (alwaysRun = true)
+    public void setUp() {
+        app.init();
+
     }
 
-    ///********************************************
-
-    public void type(By locator, String text){
-        if(text!=null) {
-            WebElement element = wd.findElement(locator);
-            element.click();
-            element.clear();
-            element.sendKeys(text);
-        }
+    @AfterSuite(alwaysRun = true)
+    public void tearDown() {
+        app.stop();
     }
-
-    public void click(By locator){
-        wd.findElement(locator).click();
-    }
-
-    public boolean isElementPresent(By locator){
-
-        return wd.findElements(locator).size()>0;
-    }
-
 
 }
